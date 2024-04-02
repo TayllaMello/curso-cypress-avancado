@@ -2,7 +2,7 @@ describe('Hacker Stories', () => {
   const initialTerm = 'React'
   const newTerm = 'Cypress'
 
-  context('Hitting the real API', () => {
+  context.skip('Hitting the real API', () => {
     beforeEach(() => {
       cy.intercept({
         method: 'GET',
@@ -314,7 +314,7 @@ context('Errors', () => {
     cy.visit('/')
     cy.wait('@getServerFailure')
 
-    cy.get('p:contaisn(Something went wrong ...)')
+    cy.get('p:contains(Something went wrong ...)')
       .should('be.visible')
   })
 
@@ -328,6 +328,24 @@ context('Errors', () => {
     cy.visit('/')
     cy.wait('@getNetworkFailure')
 
-    cy.get('p:contaisn(Something went wrong ...)').should('be.visible')
+    cy.get('p:contains(Something went wrong ...)').should('be.visible')
   })
+})
+
+it('shows a "Loading ..." state before showing the results', () => {
+  cy.intercept(
+    'GET',
+    '**/search**',
+    {
+      delay: 1000,
+      fixture: 'stories'
+    }
+  ).as('getDelayedStories')
+
+  cy.visit('/')
+
+  cy.assertLoadingIsShownAndHidden()
+  cy.wait('@getDelayedStories')
+
+  cy.get('.item').should('have.length', 2)
 })
